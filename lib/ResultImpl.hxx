@@ -48,7 +48,7 @@ namespace resultpp::internal {
          * @brief Operator to set the error message.
          * @param message The error message to set.
          */
-        void operator=(const std::string &message) { *this->_message = message; }
+        void operator=(const std::string &message) { this->_message = message; }
 
         /**
          * @brief Operator to override the current values with those of another ResultImpl instance.
@@ -63,7 +63,7 @@ namespace resultpp::internal {
          * @return A reference to the updated ResultImpl instance.
          */
         ResultImpl<T> &operator<<(const T &data) {
-            *this->_type = data;
+            this->_type = data;
             return *this;
         }
 
