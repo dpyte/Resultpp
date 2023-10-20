@@ -1,0 +1,5 @@
+Checks: '-*,hicpp,bugprone-*,performance-*,google-runtime-*,llvm-header-guard,misc-include-cleaner,misc-misleading-bidirectional,misc-misplaced-const,misc-redundant-expression,modernize-use-nullptr,modernize-use-override,modernize-use-auto,modernize-use-using,performance-enum-size'
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*^(re2.hxx)'
+AnalyzeTemporaryDtors: false
+FormatStyle: llvm
