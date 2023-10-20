@@ -72,7 +72,8 @@ Thumbs.db
 
 # --------
 build
-*.idea
+/.idea
+
 *.ccls-cache
 .cache
 

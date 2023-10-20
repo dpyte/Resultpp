@@ -22,9 +22,6 @@ namespace resultpp::internal {
      */
     template<typename T, typename = std::enable_if<std::is_integral<T>::value>>
     class ResultImpl {
-        static_assert(std::is_copy_constructible<T>::value, "T must be copy-constructible");
-        static_assert(std::is_default_constructible_v<T>, "T must be default-constructible");
-
     protected:
         T _type;
         std::string _message;
