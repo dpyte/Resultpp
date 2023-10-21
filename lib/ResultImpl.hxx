@@ -20,7 +20,7 @@ namespace resultpp::internal {
      * @note It's important to use this class with care and ensure that it
      * accurately represents the intended result of encapsulated
      */
-    template<typename T, typename = std::enable_if<std::is_integral<T>::value>>
+    template<typename T>
     class ResultImpl {
     protected:
         T _type;
@@ -51,7 +51,24 @@ namespace resultpp::internal {
          * @brief Operator to override the current values with those of another ResultImpl instance.
          * @param ri The ResultImpl instance from which to copy the values.
          */
-        void operator=(const ResultImpl<T> &ri) { *this = ri; }
+        void operator=(const ResultImpl<T> &ri) {
+            this->_type = ri._type;
+            this->_message = ri._message;
+        }
+
+        /**
+         * @brief Move assignment operator
+         *
+         * @param ri The ResultImpl instance from which to move the values from.
+         * @return A reference to the updated ResultImpl object
+         */
+        ResultImpl<T> &operator=(ResultImpl<T> &&ri) noexcept {
+            if (this != &ri) {
+                _type = std::move(ri._type);
+                _message = std::move(ri._message);
+            }
+            return *this;
+        }
 
         /**
          * @brief Operator to override the stored data with new data.
@@ -68,13 +85,13 @@ namespace resultpp::internal {
          * @brief Get the stored data.
          * @return The stored data or value.
          */
-        [[nodiscard]] T Data() const { return _type; }
+        [[nodiscard]] const T &Data() const { return _type; }
 
         /**
          * @brief Get the associated error message.
          * @return The associated error message.
          */
-        [[nodiscard]] std::string Message() const { return _message; }
+        [[nodiscard]] const std::string &Message() const { return _message; }
 
         /**
          * @brief Set the data using rvalue reference.
