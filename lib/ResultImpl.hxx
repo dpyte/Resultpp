@@ -22,6 +22,8 @@ namespace resultpp::internal {
      */
     template<typename T>
     class ResultImpl {
+        using resultimpl_t = ResultImpl<T>;
+
     protected:
         T _type;
         std::string _message;
@@ -38,8 +40,11 @@ namespace resultpp::internal {
          * @param type The data or value to be stored.
          * @param msg An optional error message (default is an empty string).
          */
-        ResultImpl(T &&type, std::string &&msg = "") : _type(std::forward<T>(type)), _message(std::forward<std::string>(msg)) {}
-        ResultImpl(const T &type, const std::string &msg = "") : _type(type), _message(msg) {}
+        ResultImpl(T &&type, std::string &&msg = "")
+                : _type(std::forward<T>(type)), _message(std::forward<std::string>(msg)) {}
+
+        ResultImpl(const T &type, const std::string &msg = "")
+                : _type(type), _message(msg) {}
 
         /**
          * @brief Operator to set the error message.
@@ -51,9 +56,31 @@ namespace resultpp::internal {
          * @brief Operator to override the current values with those of another ResultImpl instance.
          * @param ri The ResultImpl instance from which to copy the values.
          */
-        void operator=(const ResultImpl<T> &ri) {
-            this->_type = ri._type;
+        void operator=(const resultimpl_t &ri) {
+            if (this == &ri) return;
+
+            this->_type = std::move(ri._type);
             this->_message = ri._message;
+        }
+
+        /**
+         * @brief Equality operator for comparing two ResultImpl instances.
+         * @param lhs The left-hand side ResultImpl instance for comparison.
+         * @return `true` if the instances are equal, `false` otherwise.
+         */
+        inline bool operator==(const resultimpl_t &lhs) const noexcept {
+            return _type == lhs._type;
+        }
+
+        /**
+         * @brief Swap the content of two ResultImpl instances.
+         *
+         * @param r1 The first ResultImpl<T> instance.
+         * @param r2 The second ResultImpl<T> instance.
+         */
+        friend void swap(resultimpl_t &r1, resultimpl_t &r2) {
+            std::swap(r1._type, r2._type);
+            std::swap(r1._message, r2._message);
         }
 
         /**
@@ -62,7 +89,7 @@ namespace resultpp::internal {
          * @param data The new data to be stored.
          * @return A reference to the updated ResultImpl instance.
          */
-        ResultImpl<T> &operator<<(const T &data) {
+        resultimpl_t &operator<<(const T &data) {
             this->_type = data;
             return *this;
         }

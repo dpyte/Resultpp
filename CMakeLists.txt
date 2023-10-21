@@ -78,7 +78,6 @@ endif ()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops -fPIC ${CXX_EXTRA}")
 
-check_cxx_compiler_flag(-fno-builtin HAVE_FNO_BUILTIN)
 check_cxx_compiler_flag(-fstack-protector-strong HAS_STACK_PROTECTOR_STRONG)
 check_cxx_compiler_flag(-march=native SUPPORTS_MARCH_NATIVE)
 check_cxx_compiler_flag(-mtune=native SUPPORTS_MTUNE_NATIVE)
