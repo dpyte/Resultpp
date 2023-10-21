@@ -57,20 +57,6 @@ namespace resultpp::internal {
         }
 
         /**
-         * @brief Move assignment operator
-         *
-         * @param ri The ResultImpl instance from which to move the values from.
-         * @return A reference to the updated ResultImpl object
-         */
-        ResultImpl<T> &operator=(ResultImpl<T> &&ri) noexcept {
-            if (this != &ri) {
-                _type = std::move(ri._type);
-                _message = std::move(ri._message);
-            }
-            return *this;
-        }
-
-        /**
          * @brief Operator to override the stored data with new data.
          *
          * @param data The new data to be stored.
