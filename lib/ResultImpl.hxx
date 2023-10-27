@@ -110,7 +110,7 @@ namespace resultpp::internal {
          * @brief Get the stored data.
          * @return The stored data or value.
          */
-        [[nodiscard]] const T &Data() const { return _type; }
+        [[nodiscard]] T &Data() const { return _type; }
 
         /**
          * @brief Get the associated error message.
