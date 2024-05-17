@@ -4,6 +4,7 @@
 #include <functional>// std::function
 #include <string>    // std::string
 #include <type_traits>
+#include <stdexcept> // std::runtime_error
 
 namespace resultpp::internal {
     /**
@@ -42,10 +43,10 @@ namespace resultpp::internal {
          * @param msg An optional error message (default is an empty string).
          */
         ResultImpl(T &&type, std::string &&msg = "")
-                : _type(std::forward<T>(type)), _message(std::forward<std::string>(msg)) {}
+            : _type(std::forward<T>(type)), _message(std::forward<std::string>(msg)) {}
 
         ResultImpl(const T &type, const std::string &msg = "")
-                : _type(type), _message(msg) {}
+            : _type(type), _message(msg) {}
 
         /**
          * @brief Operator to set the error message.
@@ -110,13 +111,13 @@ namespace resultpp::internal {
          * @brief Get the stored data.
          * @return The stored data or value.
          */
-        [[nodiscard]] const T &Data() const { return _type; }
+        [[nodiscard]] const T &Data() const noexcept { return _type; }
 
         /**
          * @brief Get the associated error message.
          * @return The associated error message.
          */
-        [[nodiscard]] const std::string &Message() const { return _message; }
+        [[nodiscard]] const std::string &Message() const noexcept { return _message; }
 
         /**
          * @brief Set the data using rvalue reference.
@@ -134,13 +135,13 @@ namespace resultpp::internal {
          * @brief Check if the instance represents a successful result (Ok).
          * @return `true` if the instance is in a success state (message is empty), `false` otherwise.
          */
-        bool IsOk() const { return _message.empty(); }
+        [[nodiscard]] constexpr bool IsOk() const noexcept { return _message.empty(); }
 
         /**
          * @brief Check if the instance represents an error result (Err).
          * @return `true` if the instance is in an error state (message is not empty), `false` otherwise.
          */
-        bool IsErr() const { return !_message.empty(); }
+        [[nodiscard]] constexpr bool IsErr() const noexcept { return !_message.empty(); }
 
         /**
          * @brief Maps the data value of the Result to a new value using a provided mapping function.
@@ -154,6 +155,41 @@ namespace resultpp::internal {
          */
         template<typename U>
         ResultImpl<U> Map(std::function<U(const T &)> func) const {
+            if (IsOk()) return ResultImpl<U>(func(Data()));
+            return ResultImpl<U>(Message());
+        }
+
+        /**
+         * @brief Applies a function to the data value of the Result and returns a new Result with the mapped data.
+         *
+         * If the Result is in an "Ok" state, the provided function is applied to the data, resulting in a new "Ok"
+         * Result with the mapped data. If the Result is in an "Err" state, the function is not applied, and a new "Err"
+         * Result is returned with the original error message.
+         *
+         * @tparam U The type of the data to be mapped to.
+         * @param func A function that takes the current data value and returns a new value of type U.
+         * @return A new Result with the mapped data if the Result is in an "Ok" state,
+         *         or a new Result with the original error message if the Result is in an "Err" state.
+         */
+        template<typename U>
+        ResultImpl<U> FlatMap(std::function<ResultImpl<U>(const T&)> func) const {
+            if (IsOk()) return func(Data());
+            return ResultImpl<U>(Message());
+        }
+
+        /**
+         * @brief Applies a mapping function to the encapsulated data of a ResultImpl instance.
+         * If the ResultImpl instance is in an 'Ok' state, the mapping function is applied to the encapsulated data,
+         * resulting in a new ResultImpl instance with the mapped data. If the ResultImpl instance is in an 'Err' state,
+         * the mapping function is not applied, and a new ResultImpl instance is returned with the original error message.
+         *
+         * @tparam U The type of data to be returned after applying the mapping function.
+         * @param func The mapping function to be applied to the encapsulated data.
+         * @return A new ResultImpl<U> instance with the mapped data if the original ResultImpl instance is in an 'Ok' state,
+         * or a new ResultImpl<U> instance with the original error message if the original ResultImpl instance is in an 'Err' state.
+         */
+        template<typename U>
+        ResultImpl<U> AndThen(std::function<U(const T&)> func) const {
             if (IsOk()) return ResultImpl<U>(func(Data()));
             return ResultImpl<U>(Message());
         }
@@ -206,6 +242,30 @@ namespace resultpp::internal {
         resultimpl_t OrElse(std::function<resultimpl_t(const std::string &)> func) {
             if (IsOk()) return resultimpl_t(Data());
             return func(Message());
+        }
+
+        /**
+         * @brief Get the stored data if the result is in "Ok" state, otherwise throw an error.
+         *
+         * @return The stored data.
+         * @throw std::runtime_error If the result is in "Err" state.
+         */
+        T Unwrap() const {
+            if (IsOk()) return Data();
+            throw std::runtime_error(Message());
+        }
+
+        /**
+         * @brief Throws an exception with the given error message if the result is in an error state.
+         *
+         * @tparam T The type of the encapsulated data.
+         * @param errorMessage The error message.
+         * @return The encapsulated data if the result is in a success state.
+         * @throws std::runtime_error if the result is in an error state.
+         */
+        T Expect(const std::string& errorMessage) const {
+            if (IsOk()) return Data();
+            throw std::runtime_error(errorMessage);
         }
     };
 }// namespace resultpp::internal
