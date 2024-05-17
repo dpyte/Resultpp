@@ -42,10 +42,10 @@ namespace resultpp::internal {
          * @param msg An optional error message (default is an empty string).
          */
         ResultImpl(T &&type, std::string &&msg = "")
-                : _type(std::forward<T>(type)), _message(std::forward<std::string>(msg)) {}
+            : _type(std::forward<T>(type)), _message(std::forward<std::string>(msg)) {}
 
         ResultImpl(const T &type, const std::string &msg = "")
-                : _type(type), _message(msg) {}
+            : _type(type), _message(msg) {}
 
         /**
          * @brief Operator to set the error message.
